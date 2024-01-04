@@ -1,0 +1,66 @@
+from pyspark.sql import SparkSession
+
+# Connection details
+server_name = 'induxdb.teambte.com'
+database_name = 'indux'
+username = 'adaudani'
+password = '6[VZJ9F_I_?AIV9\\'
+jdbc_url = f'jdbc:sqlserver://{server_name};database={database_name};user={username};password={password}'
+spark.conf.set("spark.sql.execution.logJdbcCalls", "true")
+
+
+# Redshift details 
+
+redshift_url = 'jdbc:redshift://your-redshift-cluster-name.region.redshift.amazonaws.com:5439/your_database' 
+
+redshift_table = 'your_redshift_table' 
+
+aws_access_key_id = 'your_aws_access_key_id' 
+
+aws_secret_access_key = 'your_aws_secret_access_key' 
+
+# Spark session creation
+spark = SparkSession.builder \
+    .appName("ReadFromSqlServer") \
+    .getOrCreate()
+
+# Example query
+query = 'SELECT * FROM client c'
+
+# Read data from SQL Server using PySpark
+df = spark.read \
+    .format("jdbc") \
+    .option("url", jdbc_url) \
+    .option("dbtable", f'({query}) as tmp') \
+    .option("driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver") \
+    .load()
+
+# Show the DataFrame
+df.show(5)
+
+# write data into s3 bucket 
+s3_path = 's3://bte-lakeformation/test'
+# Correct usage
+df.write.parquet(s3_path, mode='overwrite')
+
+# write data into redshift
+df.write \ 
+
+    .format("com.databricks.spark.redshift") \ 
+
+    .option("url", redshift_url) \ 
+
+    .option("dbtable", redshift_table) \ 
+
+    .option("tempdir", "s3://your-temporary-s3-bucket/")  # Temporary S3 bucket for intermediate data 
+
+    .option("aws_access_key_id", aws_access_key_id) \ 
+
+    .option("aws_secret_access_key", aws_secret_access_key) \ 
+
+    .mode("overwrite")  # Choose 'overwrite' or 'append' based on your use case 
+
+    .save() 
+
+# Stop the Spark session
+spark.stop()
