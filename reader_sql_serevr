@@ -1,0 +1,30 @@
+import boto3
+import sys
+import time
+import uuid
+
+from datetime import datetime
+from awsglue.context import GlueContext
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from pyspark.sql.functions import input_file_name
+from awsglue.context import GlueContext
+from pyspark.context import SparkContext
+
+# Create a SparkContext
+sc = SparkContext()
+glueContext = GlueContext(sc)
+
+df_datatype_test = glueContext.create_dynamic_frame.from_options(
+    connection_type="sqlserver",
+    connection_options={
+        "useConnectionProperties": "true",
+        "dbtable": "Test_table_name",
+        "connectionName": "SQL Server Indux",
+    },
+    transformation_ctx="MicrosoftSQLServer_node1703653553508",
+)
+
+
+df_datatype_test.printSchema()
