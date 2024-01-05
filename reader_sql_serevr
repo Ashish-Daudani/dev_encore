@@ -28,3 +28,5 @@ df_datatype_test = glueContext.create_dynamic_frame.from_options(
 
 
 df_datatype_test.printSchema()
+
+sc.stop()
